@@ -1,0 +1,45 @@
+{
+  "name": "jab_oauth2_server",
+  "description": "OAuth2 server for Jab env used with express",
+  "author": {
+    "name": "A. Mélon",
+    "email": "pastaga@gmail.com"
+  },
+  "keywords": [
+    "oauth2",
+    "jab",
+    "express",
+    "web",
+    "server",
+    "rest",
+    "restfull"
+  ],
+
+  "version": "0.0.1",
+  "dependencies": {
+    "oauth2orize": "*",
+    "passport": "*",
+    "passport-local": "*",
+    "passport-http": "*",
+    "passport-http-bearer": "*",
+    "serializer": "0.0.3",
+    "lodash": "~1.1.1",
+    "express": "~3.2.0"
+  },
+  "devDependencies": {
+    "chai": "~1.5.0",
+    "mocha": "1.x.x",
+    "grunt": "~0.4.0",
+    "grunt-simple-mocha": "~0.4.0",
+    "request": "~2.16.6"
+  },
+  "engines": {
+    "node": ">= 0.8.x"
+  },
+
+  "main": "index.js",
+
+  "scripts": {
+    "test": "grunt test"
+  }
+}
