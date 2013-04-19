@@ -73,15 +73,15 @@ function initialize(options) {
 
 
 server.exchange(oauth2orize.exchange.password(function(client, username, password, scope, done) {
-	db.users.findByUsername(username, function(err, user) {
+  db.users.findByUsername(username, function(err, user) {
     if (err) { return done(err); }
     if (!user || !user.passwordIsOk(password)) { return done(null, false); }
 
-		var token = serializer.stringify([user.id, client.clientId, +new Date()]);
-		db.tokens.save(token, user.id, client.clientId, function() {
-			done(null, token);
-		});
-	});
+    var token = serializer.stringify([user.id, client.clientId, +new Date()]);
+    db.tokens.save(token, user.id, client.clientId, function() {
+      done(null, token);
+    });
+    });
 }));
 
 
