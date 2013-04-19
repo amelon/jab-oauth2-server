@@ -1,6 +1,7 @@
 /*jshint node:true */
 /*global describe, it, before */
 'use strict';
+process.env.NODE_ENV = 'test';
 
 var assert = require('chai').assert;
 

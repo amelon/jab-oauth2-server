@@ -152,7 +152,7 @@ passport.use(new BasicStrategy(basicStrategyCheck));
  */
 
 function bearerStrategyCheck(accessToken, done) {
-  db.accessTokens.find(accessToken, function(err, token) {
+  db.tokens.find(accessToken, function(err, token) {
     if (err) {
       return done(err);
     }

@@ -1,10 +1,21 @@
 {
   "name": "jab_oauth2_server",
   "description": "OAuth2 server for Jab env used with express",
+
   "author": {
     "name": "A. Mélon",
     "email": "pastaga@gmail.com"
   },
+
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amelon/jab-oauth2-server.git"
+  },
+
+  "bugs": {
+    "url": "https://github.com/amelon/jab-oauth2-server/issues"
+  },
+
   "keywords": [
     "oauth2",
     "jab",
@@ -15,7 +26,7 @@
     "restfull"
   ],
 
-  "version": "0.0.1",
+  "version": "0.0.2",
   "dependencies": {
     "oauth2orize": "*",
     "passport": "*",
