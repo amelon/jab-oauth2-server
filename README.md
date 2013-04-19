@@ -7,6 +7,8 @@
 var express = require('express');
 var app = express();
 var oauth_server = require('jab-oauth2-server');
+var passport = require('passport');
+
 
 //mimic mongoose db user collection - DO NOT USE ON PRODUCTION
 var users = require('jab-oauth2-server/default_db_users');
@@ -30,9 +32,18 @@ app.use(oauth_server.service);
 
 app.listen(3000);
 
-app.get('/', function(req, res){
+//unprotected resource
+app.get('/', function(req, res) {
   res.send('Hello World');
 });
+
+//protected resource
+app.get('/need_bearer'
+, passport.authenticate('bearer', {session: false})
+, function(req, res) {
+    res.json({ user_id: req.user.id, name: req.user.name, scope: req.authInfo.scope });
+  }
+);
 
 app.listen(3000);
 ```
@@ -64,6 +75,7 @@ app.listen(3000);
 
   var bearer_token;
 
+  //exchange token
   $.ajax('oauth/token', {
     dataType: 'json'
   , type: 'POST'
@@ -78,12 +90,31 @@ app.listen(3000);
   }).done(function(data, textStatus) {
     if (data.token_type == 'bearer' && data.access_token) {
       bearer_token = data.access_token;
+
+      accessProtectedResource('test_bearer');
     }
     console.log('done data', data, 'textStatus', textStatus);
 
   }).fail(function(jqXhr, textStatus, errorThrown) {
     console.log('fail textStatus', textStatus, 'errorThrown', errorThrown);
   });
+
+  //...
+  //access protected resource
+  function accessProtectedResource(url, done, fail) {
+    $.ajax(url, {
+      dataType: 'json'
+    , headers: {
+        'authorization': 'Bearer ' + bearer_token
+      }
+    }).done(function(data, textStatus) {
+      console.log('done data', data, 'textStatus', textStatus);
+      if (done) done(data);
+    }).fail(function(jqXhr, textStatus, errorThrown) {
+      console.log('fail textStatus', textStatus, 'errorThrown', errorThrown);
+      if (fail) fail(data);
+    });
+  }
 
 ```
 
