@@ -6,10 +6,19 @@ var oauth2orize       = require('oauth2orize')
 
   //@todo: need config settings for crypt_key & sign_key
   , serializer        = require('serializer').createSecureSerializer('crypt_key', 'sign_key')
-  , _                 = require('lodash')
   , assert            = require('assert')
-  , express           = require('express')
-  , app               = express();
+  , slide             = require('slide');
+
+
+var BasicStrategy = require('passport-http').BasicStrategy
+  , BearerStrategy = require('passport-http-bearer').Strategy;
+
+
+
+function isFunction(fn) {
+  return typeof fn == 'function';
+}
+
 
 // create OAuth 2.0 server
 var server = oauth2orize.createServer()
@@ -48,27 +57,38 @@ function checkInitOptions(options) {
 
 
 function checkdbClients(DBClients) {
-  assert(_.isFunction(DBClients.findByClientId), 'DBClients must implement findByClientId');
+  assert(isFunction(DBClients.findByClientId), 'DBClients must implement findByClientId');
   var client = new DBClients();
-  assert(_.isFunction(client.clientSecretIsOk), 'client instance must implement clientSecretIsOk');
+  assert(isFunction(client.clientSecretIsOk), 'client instance must implement clientSecretIsOk');
 }
 
 function checkdbUsers(DBUsers) {
-  assert(_.isFunction(DBUsers.findByUsername), 'DBUsers must implement findByUsername');
-  assert(_.isFunction(DBUsers.find), 'DBUsers must implement find');
+  assert(isFunction(DBUsers.findByUsername), 'DBUsers must implement findByUsername');
+  assert(isFunction(DBUsers.find), 'DBUsers must implement find');
   var user = new DBUsers();
-  assert(_.isFunction(user.passwordIsOk), 'user instance must implement passwordIsOk');
+  assert(isFunction(user.passwordIsOk), 'user instance must implement passwordIsOk');
 }
 
 function checkdbTokens(DBTokens) {
-  assert(_.isFunction(DBTokens.save), 'DBTokens must implement save');
-  assert(_.isFunction(DBTokens.find), 'DBTokens must implement find');
+  assert(isFunction(DBTokens.save), 'DBTokens must implement save');
+  assert(isFunction(DBTokens.find), 'DBTokens must implement find');
 }
 
 
-function initialize(options) {
+
+/**
+ * Module dependencies.
+ */
+function attach(app, options) {
   options = options || {};
   checkInitOptions(options);
+
+  app.use(passport.initialize());
+  app.use(passport.session());
+  app.use(app.router);
+
+  authenticateRoute(app);
+
 }
 
 
@@ -87,37 +107,6 @@ server.exchange(oauth2orize.exchange.password(function(client, username, passwor
 
 
 /**
- * Module dependencies.
- */
-// var express = require('express');
-
-
-// Express configuration
-
-// var app = express();
-// app.use(express.favicon(__dirname + '/public/images/icon/favicon.ico'));
-// app.set('view engine', 'ejs');
-// app.use(express.logger());
-// app.use(express.cookieParser());
-// app.use(express.bodyParser());
-// app.use(express.session({ secret: 'keyboard cat' }));
-
-// app.use(passport.initialize());
-// app.use(passport.session());
-//
-// app.use(app.router);
-// app.use(express.static('public', {maxAge: 24 * 60 * 60 * 1000}));
-// app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(app.router);
-
-var BasicStrategy = require('passport-http').BasicStrategy
-  , BearerStrategy = require('passport-http-bearer').Strategy;
-
-
-/**
  * [basicStrategyCheck description]
  * @param  {String}   clientId      [description]
  * @param  {String}   clientSecret  [description]
@@ -130,11 +119,11 @@ function basicStrategyCheck(clientId, clientSecret, done) {
       return done(err);
     }
 
-    if (!client || !client.clientSecretIsOk(clientSecret)) {
-      return done(null, false);
+    if (client && client.clientSecretIsOk(clientSecret)) {
+      return done(null, client);
     }
 
-    return done(null, client);
+    return done(null, false);
   });
 }
 
@@ -151,32 +140,38 @@ passport.use(new BasicStrategy(basicStrategyCheck));
  * the authorizing user.
  */
 
+
 function bearerStrategyCheck(accessToken, done) {
-  db.tokens.find(accessToken, function(err, token) {
-    if (err) {
-      return done(err);
-    }
+  var chain = slide.chain
+    , findToken = db.tokens.find.bind(db.tokens)
+    , findUser = db.users.find.bind(db.users);
 
-    if (!token) {
-      return done(null, false);
-    }
+  chain([
+    [findToken, accessToken]
+  , [checkToken, chain.last]
+  , [findUser, chain.last]
+  ], function (err, res) {
+    var user;
 
-    db.users.find(token.userId, function(err, user) {
-      if (err) {
-        return done(err);
-      }
+    if (err) { return done(err); }
 
-      if (!user) {
-        return done(null, false);
-      }
+    user = res[res.length - 1];
+
+    if (!user) { return done(null, false); }
 
       // to keep this example simple, restricted scopes are not implemented,
       // and this is just for illustrative purposes
       var info = { scope: '*' };
       done(null, user, info);
-    });
   });
 }
+
+function checkToken(token, cb) {
+  if (!token) { return cb(null, false); }
+  cb(null, token.userId);
+}
+
+
 
 passport.use(new BearerStrategy(bearerStrategyCheck));
 
@@ -187,26 +182,17 @@ passport.use(new BearerStrategy(bearerStrategyCheck));
  * /oauth/token to get
  *
  */
-app.post('/oauth/token',   [
-  passport.authenticate('basic', { session: false })
-, server.token()
-, server.errorHandler()
-]);
+function authenticateRoute(app) {
+  app.post('/oauth/token',   [
+    passport.authenticate('basic', { session: false })
+  , server.token()
+  , server.errorHandler()
+  ]);
+}
 
-// app.get('/test_bearer',
-// passport.authenticate('bearer', {session: false})
-// , function(req, res) {
-//     // req.authInfo is set using the `info` argument supplied by
-//     // `BearerStrategy`.  It is typically used to indicate scope of the token,
-//     // and used in access control checks.  For illustrative purposes, this
-//     // example simply returns the scope in the response.
-//     res.json({ user_id: req.user.id, name: req.user.name, scope: req.authInfo.scope })
-//   }
-// );
 
-// app.listen(3000);
 
 module.exports = {
-  init: initialize
-, service: app
+  attach: attach
+, passport: passport
 };

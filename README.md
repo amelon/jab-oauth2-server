@@ -28,7 +28,7 @@ oauth_server.init({dbUsers: users, dbTokens: tokens, clientId: 'james', clientSe
 app.use(express.cookieParser());
 app.use(express.bodyParser());
 app.use(express.session({ secret: 'keyboard cat' }));
-app.use(oauth_server.service);
+oauth_server.attach(app, {dbUsers: users, dbTokens: tokens, clientId: 'james', clientSecret: '007'});
 
 app.listen(3000);
 

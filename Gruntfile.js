@@ -2,20 +2,30 @@
 module.exports = function (grunt) {
 	'use strict';
 
-	grunt.loadNpmTasks('grunt-simple-mocha');
+  grunt.loadNpmTasks('grunt-simple-mocha');
+	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	grunt.initConfig({
-		test: {
+		simplemocha: {
 			options: {
         ignoreLeaks: false
       , ui: 'bdd'
-      , reporter: 'spec'
+      , reporter: 'dot'
+      // , reporter: 'spec'
       }
     , all: { src: ['test/**/*-test.js'] }
     }
+
+  , watch: {
+      test: {
+        files: ['*.js', 'test/*.js']
+      , tasks: ['simplemocha']
+      , options: {
+          interrupt: true
+        }
+      }
+    }
 	});
 
-  grunt.renameTask('simplemocha', 'test');
-
-	grunt.registerTask('default', ['test']);
+	grunt.registerTask('default', ['simplemocha', 'watch']);
 };

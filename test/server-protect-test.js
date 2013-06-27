@@ -27,11 +27,10 @@ function btoa(data) {
 
 describe('OAuth Jab server protect ressources', function() {
   before(function(done) {
-    oauth_server.init({dbUsers: users, dbTokens: tokens, clientId: 'james', clientSecret: '007'});
     app.use(express.cookieParser());
     app.use(express.bodyParser());
     app.use(express.session({ secret: 'keyboard cat' }));
-    app.use(oauth_server.service);
+    oauth_server.attach(app, {dbUsers: users, dbTokens: tokens, clientId: 'james', clientSecret: '007'});
 
     this.server = http.createServer(app);
     this.server.listen(PORT, done);
@@ -91,8 +90,8 @@ describe('OAuth Jab server protect ressources', function() {
         uri: bearer_uri
       , method: 'GET'
       , headers: {
-        'authorization': 'Bearer ' + this.access_token
-      }
+          'authorization': 'Bearer ' + this.access_token
+        }
       , json: true
       }, function(err, resp, body) {
         this.body = body;
@@ -113,8 +112,8 @@ describe('OAuth Jab server protect ressources', function() {
         uri: bearer_uri
       , method: 'GET'
       , headers: {
-        'authorization': 'Bearer xx' + this.access_token
-      }
+          'authorization': 'Bearer xx' + this.access_token
+        }
       , json: true
       }, function(err, resp, body) {
         this.body = body;

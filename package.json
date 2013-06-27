@@ -1,21 +1,17 @@
 {
-  "name": "jab_oauth2_server",
+  "name": "jab-oauth2-server",
   "description": "OAuth2 server for Jab env used with express",
-
   "author": {
     "name": "A. Mélon",
     "email": "pastaga@gmail.com"
   },
-
   "repository": {
     "type": "git",
     "url": "https://github.com/amelon/jab-oauth2-server.git"
   },
-
   "bugs": {
     "url": "https://github.com/amelon/jab-oauth2-server/issues"
   },
-
   "keywords": [
     "oauth2",
     "jab",
@@ -25,32 +21,31 @@
     "rest",
     "restfull"
   ],
-
-  "version": "0.0.3",
+  "version": "0.0.5",
   "dependencies": {
     "oauth2orize": "*",
     "passport": "*",
     "passport-local": "*",
     "passport-http": "*",
     "passport-http-bearer": "*",
-    "serializer": "0.0.3",
+    "serializer": "~0.0.3",
     "lodash": "~1.1.1",
-    "express": "~3.2.0"
+    "slide": "~1.1.4"
   },
   "devDependencies": {
+    "grunt": "~0.4.0",
+    "express": "~3.2.0",
     "chai": "~1.5.0",
     "mocha": "1.x.x",
-    "grunt": "~0.4.0",
+    "grunt-contrib-watch": "~0.4.0",
     "grunt-simple-mocha": "~0.4.0",
     "request": "~2.16.6"
   },
   "engines": {
     "node": ">= 0.8.x"
   },
-
   "main": "index.js",
-
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt simplemocha"
   }
 }

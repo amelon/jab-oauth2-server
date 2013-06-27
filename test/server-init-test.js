@@ -6,6 +6,8 @@ process.env.NODE_ENV = 'test';
 var assert = require('chai').assert;
 
 var oauth_server = require('../index')
+  , express = require('express')
+  , app = express()
   , dbUsers
   , dbClients
   , dbTokens;
@@ -19,16 +21,16 @@ describe('Jab oauth server', function() {
 
   describe('init', function() {
     it('should throw errors with bad options', function() {
-      assert.throw( function() { oauth_server.init({dbUsers: '', dbTokens: '', dbClients: ''}); });
+      assert.throw( function() { oauth_server.attach(app, {dbUsers: '', dbTokens: '', dbClients: ''}); });
 		});
 
 
     it('should init with dbUsers, dbTokens, dbClients', function() {
-      assert.doesNotThrow(function() { oauth_server.init({dbUsers: dbUsers, dbTokens: dbTokens, dbClients: dbClients}); });
+      assert.doesNotThrow(function() { oauth_server.attach(app, {dbUsers: dbUsers, dbTokens: dbTokens, dbClients: dbClients}); });
     });
 
     it('should init with dbUsers, dbTokens, clientId + clientSecret', function() {
-      assert.doesNotThrow(function() { oauth_server.init({dbUsers: dbUsers, dbTokens: dbTokens, clientId: 1, clientSecret: '007'}); });
+      assert.doesNotThrow(function() { oauth_server.attach(app, {dbUsers: dbUsers, dbTokens: dbTokens, clientId: 1, clientSecret: '007'}); });
     });
 
 	});
