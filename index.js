@@ -88,6 +88,7 @@ function attach(app, options) {
   app.use(app.router);
 
   authenticateRoute(app);
+  logoutRoute(app);
 
 }
 
@@ -97,10 +98,10 @@ server.exchange(oauth2orize.exchange.password(function(client, username, passwor
     if (err) { return done(err); }
     if (!user || !user.passwordIsOk(password)) { return done(null, false); }
 
-    var token = serializer.stringify([user.id, client.clientId, +new Date()]);
+    var token = serializer.stringify([user.id, client.clientId, +new Date(), db.tokens.count()]);
     db.tokens.save(token, user.id, client.clientId, function() {
-      done(null, token);
-    });
+        done(null, token);
+      });
     });
 }));
 
@@ -156,6 +157,8 @@ function bearerStrategyCheck(accessToken, done) {
     if (err) { return done(err); }
 
     user = res[res.length - 1];
+    delete user.password;
+    user.access_token = accessToken;
 
     if (!user) { return done(null, false); }
 
@@ -190,6 +193,17 @@ function authenticateRoute(app) {
   ]);
 }
 
+function logoutRoute(app) {
+  app.get('/oauth/logout',
+    passport.authenticate('bearer', {session: false})
+  , function(req, res) {
+      db.tokens.remove(req.user.access_token, function(err) {
+        if (err) { return; }
+        req.logout();
+        res.send(true);
+      })
+  });
+}
 
 
 module.exports = {

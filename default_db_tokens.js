@@ -16,18 +16,21 @@ DefaultDBTokens.prototype = {
       return !_.isFunction(value);
     });
     db.push(item);
-    if (cb) { cb(null, item); }
+    process.nextTick(function() {
+      if (cb) { cb(null, item); }
+    })
   }
 };
 
 
 
 DefaultDBTokens.find = function(token, cb) {
-  var res = _.find(db, function(item) {
-    return item.id == token;
+  var res = _.find(db, {id: token});
+
+  process.nextTick(function() {
+    if (res) { return cb(null, res); }
+    return cb(null, false);
   });
-  if (res) { return cb(null, res); }
-  return cb(null, false);
 };
 
 DefaultDBTokens.count = function() {
@@ -36,14 +39,20 @@ DefaultDBTokens.count = function() {
 
 DefaultDBTokens.save = function(token, user_id, client_id, cb) {
   var item = new DefaultDBTokens(token, user_id, client_id);
-  item.save(cb);
-};
-
-DefaultDBTokens.remove = function(token, cb) {
-  this.find(token, function(err, res) {
-    cb(err, res);
+  process.nextTick(function() {
+    item.save(cb);
   });
 };
 
+DefaultDBTokens.remove = function(token, cb) {
+  db = _.reject(db, {id: token});
+  process.nextTick(function() {
+    cb(null, true);
+  });
+};
+
+DefaultDBTokens.list = function() {
+  return db;
+};
 
 module.exports = DefaultDBTokens;

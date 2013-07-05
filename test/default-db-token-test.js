@@ -47,7 +47,12 @@ describe('Default DB Token', function() {
       });
     });
 
-
+    it('should drop token', function(done) {
+      DefaultDbTokens.remove(1, function(err, res) {
+        assert.equal(DefaultDbTokens.count(), 2);
+        done();
+      });
+    });
   });
 
 

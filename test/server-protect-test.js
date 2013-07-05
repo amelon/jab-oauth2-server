@@ -51,7 +51,6 @@ describe('OAuth Jab server protect ressources', function() {
       }
     );
 
-
   });
 
 
