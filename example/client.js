@@ -8,7 +8,6 @@ var request = require('request')
 var token_uri = 'http://localhost:'+PORT+'/oauth/token';
 var no_bearer_uri = 'http://localhost:'+PORT+'/test_no_protect';
 var bearer_uri = 'http://localhost:'+PORT+'/test_bearer';
-var logout_uri = 'http://localhost:'+PORT+'/oauth/logout';
 
 function btoa(data) {
   return new Buffer(data, 'binary').toString('base64');
@@ -39,8 +38,8 @@ function login() {
 function logout(data) {
   console.log('next is logout');
   request({
-        uri: logout_uri
-      , method: 'GET'
+        uri: token_uri
+      , method: 'DELETE'
       , headers: {
           'authorization': 'Bearer ' + data.access_token
         }

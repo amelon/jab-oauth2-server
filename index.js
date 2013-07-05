@@ -194,15 +194,17 @@ function authenticateRoute(app) {
 }
 
 function logoutRoute(app) {
-  app.get('/oauth/logout',
+  app.delete('/oauth/token',
     passport.authenticate('bearer', {session: false})
-  , function(req, res) {
+  , function(req, res, next) {
       db.tokens.remove(req.user.access_token, function(err) {
-        if (err) { return; }
+        if (err) { return next(err); }
         req.logout();
         res.send(true);
       })
-  });
+    }
+  , server.errorHandler()
+  );
 }
 
 

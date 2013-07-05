@@ -19,7 +19,6 @@ var slide = require('slide');
 var http = require('http');
 
 var token_uri = 'http://localhost:'+PORT+'/oauth/token';
-var logout_uri = 'http://localhost:'+PORT+'/oauth/logout';
 var bearer_uri = 'http://localhost:'+PORT+'/test_bearer';
 
 function btoa(data) {
@@ -47,8 +46,8 @@ function getToken(done) {
 
 function logout(access_token, done) {
   request({
-    uri: logout_uri
-  , method: 'GET'
+    uri: token_uri
+  , method: 'DELETE'
   , headers: {
       'authorization': 'Bearer ' + access_token
     }

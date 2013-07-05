@@ -13,6 +13,28 @@ app.use(express.bodyParser());
 app.use(express.session({ secret: 'keyboard cat' }));
 oauth_server.attach(app, {dbUsers: users, dbTokens: tokens, clientId: 'james', clientSecret: '007'});
 
+app.use(logErrors);
+app.use(clientErrorHandler);
+app.use(errorHandler);
+
+function clientErrorHandler(err, req, res, next) {
+  if (req.xhr) {
+    res.send(500, { error: 'Something blew up!' });
+  } else {
+    next(err);
+  }
+}
+
+function logErrors(err, req, res, next) {
+  console.log(err.stack);
+  next(err);
+}
+
+function errorHandler(err, req, res, next) {
+  res.status(500);
+  res.render('error', { error: err });
+}
+
 var server = http.createServer(app);
 server.listen(PORT, function() {
   console.log('listen on port '+PORT);
