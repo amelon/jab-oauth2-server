@@ -10,8 +10,8 @@ module.exports = function (grunt) {
 			options: {
         ignoreLeaks: false
       , ui: 'bdd'
-      , reporter: 'dot'
-      // , reporter: 'spec'
+      // , reporter: 'dot'
+      , reporter: 'spec'
       }
     , all: { src: ['test/**/*-test.js'] }
     }

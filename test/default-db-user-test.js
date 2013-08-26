@@ -5,57 +5,69 @@
 process.env.NODE_ENV = 'test';
 
 var assert      = require('chai').assert
-	, FakeDbUser;
+  , FakeDbUser;
 
 describe('Fake DB User', function() {
-	before(function() {
-		FakeDbUser = require('../default_db_users');
-	});
+  before(function() {
+    FakeDbUser = require('../default_db_users');
+  });
 
-	describe('check static function', function() {
-		it('should have find and findByUsername', function() {
-			assert.isFunction(FakeDbUser.find);
-			assert.isFunction(FakeDbUser.findByUsername);
-		});
-	});
+  describe('check static function', function() {
+    it('should have findOneById and findOneByUsername', function() {
+      assert.isFunction(FakeDbUser.findOneById);
+      assert.isFunction(FakeDbUser.findOneByUsername);
+    });
+  });
 
-	describe('instance', function() {
-		before(function() {
-			this.db_user = new FakeDbUser(1, 'user', 'pwd');
-		});
+  describe('instance', function() {
+    before(function() {
+      this.db_user = new FakeDbUser(1, 'user', 'pwd');
+    });
 
-		it('should have passwordIsOk properties', function() {
-			assert.isFunction(this.db_user.passwordIsOk);
+    it('should have toObject & comparePassword properties', function() {
+      assert.isFunction(this.db_user.comparePassword);
+      assert.isFunction(this.db_user.toObject);
 
-			this.db_user.save();
-		});
+      this.db_user.save();
+    });
 
-		it('should be retrieved', function(done) {
-			FakeDbUser.find(1, function(err, user) {
-				if (err) { throw err; }
-				if (!user) { return done('no user found'); }
-				done();
-			});
-		});
+    it('should be retrieved', function(done) {
+      FakeDbUser.findOneById(1, function(err, user) {
+        if (err) { return done(err); }
+        if (!user) { return done('no user found'); }
+        done();
+      });
+    });
 
-		it('should return false when not retrieved', function(done) {
-			FakeDbUser.find(2, function(err, user) {
-				if (err) { throw err; }
-				assert.isFalse(user);
-				done();
-			});
-		});
+    it('should return false when not retrieved', function(done) {
+      FakeDbUser.findOneById(2, function(err, user) {
+        if (err) { return done(err); }
+        assert.isFalse(user);
+        done();
+      });
+    });
 
 
-		it('should compare password correctly', function(done) {
-			FakeDbUser.find(1, function(err, user) {
-				assert(user.passwordIsOk('pwd'));
-				assert.isFalse(user.passwordIsOk('badpwd'));
-				done();
-			});
-		});
+    it('should compare password correctly', function(done) {
+      FakeDbUser.findOneById(1, function(err, user) {
+        user.comparePassword('pwd', function(err, isMatched) {
+          assert(isMatched);
+          done();
+        });
+      });
+    });
 
-	});
+    it('should compare password correctly', function(done) {
+      FakeDbUser.findOneById(1, function(err, user) {
+
+        user.comparePassword('badpwd', function(err, isMatched) {
+          assert.isFalse(isMatched);
+          done();
+        });
+      });
+    });
+
+  });
 
 
 });

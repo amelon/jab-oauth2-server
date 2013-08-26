@@ -42,13 +42,13 @@ function checkInitOptions(options) {
   checkdbTokens(db.tokens);
 
   if (!options.dbClients) {
-    if (!options.clientId || !options.clientSecret) {
-      throw new Error('Jab OAuth2 server options should contain either dbClients option or pair clientId + clientSecret options');
+    if (!options.client_id || !options.client_secret) {
+      throw new Error('Jab OAuth2 server options should contain either dbClients option or pair client_id + client_secret options');
     }
 
     options.dbClients = require('./default_db_clients');
 
-    client = new options.dbClients(options.clientId, options.clientSecret);
+    client = new options.dbClients(options.client_id, options.client_secret);
     client.save();
   }
   db.clients = options.dbClients;
@@ -57,21 +57,22 @@ function checkInitOptions(options) {
 
 
 function checkdbClients(DBClients) {
-  assert(isFunction(DBClients.findByClientId), 'DBClients must implement findByClientId');
+  assert(isFunction(DBClients.findOneByClientId), 'DBClients must implement findOneByClientId');
   var client = new DBClients();
-  assert(isFunction(client.clientSecretIsOk), 'client instance must implement clientSecretIsOk');
+  assert(isFunction(client.clientSecretCompare), 'client instance must implement clientSecretCompare');
 }
 
 function checkdbUsers(DBUsers) {
-  assert(isFunction(DBUsers.findByUsername), 'DBUsers must implement findByUsername');
-  assert(isFunction(DBUsers.find), 'DBUsers must implement find');
+  assert(isFunction(DBUsers.findOneByUsername), 'DBUsers must implement findOneByUsername');
+  assert(isFunction(DBUsers.findOneById), 'DBUsers must implement findOneById');
   var user = new DBUsers();
-  assert(isFunction(user.passwordIsOk), 'user instance must implement passwordIsOk');
+  assert(isFunction(user.comparePassword), 'user instance must implement comparePassword');
+  assert(isFunction(user.toObject), 'user instance must implement toObject');
 }
 
 function checkdbTokens(DBTokens) {
-  assert(isFunction(DBTokens.save), 'DBTokens must implement save');
-  assert(isFunction(DBTokens.find), 'DBTokens must implement find');
+  assert(isFunction(DBTokens.createByParams), 'DBTokens must implement save');
+  assert(isFunction(DBTokens.findOneByToken), 'DBTokens must implement findOneByToken');
 }
 
 
@@ -92,18 +93,25 @@ function attach(app, options) {
 
 }
 
-
-server.exchange(oauth2orize.exchange.password(function(client, username, password, scope, done) {
-  db.users.findByUsername(username, function(err, user) {
+function exchangePassword(client, username, password, scope, done) {
+  db.users.findOneByUsername(username, function(err, user) {
     if (err) { return done(err); }
-    if (!user || !user.passwordIsOk(password)) { return done(null, false); }
+    if (!user) { return done(null, false); }
 
-    var token = serializer.stringify([user.id, client.clientId, +new Date(), db.tokens.count()]);
-    db.tokens.save(token, user.id, client.clientId, function() {
-        done(null, token);
+    user.comparePassword(password, function(err, isMatched) {
+      if (err) { return done(err); }
+      if (!isMatched) { return done(null, false); }
+
+      var token = serializer.stringify([user.id, client.client_id, +new Date(), db.tokens.count()]);
+      db.tokens.createByParams(token, user.id, client.client_id, function(err, token) {
+        if (err) { return done(err); }
+        done(null, token.token);
       });
     });
-}));
+  });
+}
+
+server.exchange(oauth2orize.exchange.password(exchangePassword));
 
 
 
@@ -115,12 +123,10 @@ server.exchange(oauth2orize.exchange.password(function(client, username, passwor
  * @return {void}                   [description]
  */
 function basicStrategyCheck(clientId, clientSecret, done) {
-  db.clients.findByClientId(clientId, function(err, client) {
-    if (err) {
-      return done(err);
-    }
+  db.clients.findOneByClientId(clientId, function(err, client) {
+    if (err) { return done(err); }
 
-    if (client && client.clientSecretIsOk(clientSecret)) {
+    if (client && client.clientSecretCompare(clientSecret)) {
       return done(null, client);
     }
 
@@ -144,8 +150,8 @@ passport.use(new BasicStrategy(basicStrategyCheck));
 
 function bearerStrategyCheck(accessToken, done) {
   var chain = slide.chain
-    , findToken = db.tokens.find.bind(db.tokens)
-    , findUser = db.users.find.bind(db.users);
+    , findToken = db.tokens.findOneByToken.bind(db.tokens)
+    , findUser = db.users.findOneById.bind(db.users);
 
   chain([
     [findToken, accessToken]
@@ -153,14 +159,15 @@ function bearerStrategyCheck(accessToken, done) {
   , [findUser, chain.last]
   ], function (err, res) {
     var user;
-
     if (err) { return done(err); }
-
     user = res[res.length - 1];
+    if (!user) { return done(null, false); }
+
+    user = user.toObject();
     delete user.password;
+    delete user.salt;
     user.access_token = accessToken;
 
-    if (!user) { return done(null, false); }
 
       // to keep this example simple, restricted scopes are not implemented,
       // and this is just for illustrative purposes
@@ -171,7 +178,7 @@ function bearerStrategyCheck(accessToken, done) {
 
 function checkToken(token, cb) {
   if (!token) { return cb(null, false); }
-  cb(null, token.userId);
+  cb(null, token.user_id);
 }
 
 
@@ -201,7 +208,7 @@ function logoutRoute(app) {
         if (err) { return next(err); }
         req.logout();
         res.send(true);
-      })
+      });
     }
   , server.errorHandler()
   );

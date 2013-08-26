@@ -11,7 +11,7 @@ var http = require('http');
 app.use(express.cookieParser());
 app.use(express.bodyParser());
 app.use(express.session({ secret: 'keyboard cat' }));
-oauth_server.attach(app, {dbUsers: users, dbTokens: tokens, clientId: 'james', clientSecret: '007'});
+oauth_server.attach(app, {dbUsers: users, dbTokens: tokens, client_id: 'james', client_secret: '007'});
 
 app.use(logErrors);
 app.use(clientErrorHandler);

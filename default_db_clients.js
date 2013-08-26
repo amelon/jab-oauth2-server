@@ -4,14 +4,14 @@
 var db;
 
 function DefaultDBClients(client_id, client_secret) {
-	this.clientId = client_id;
-	this.clientSecret = client_secret;
+	this.client_id = client_id;
+	this.client_secret = client_secret;
 	DefaultDBClients.db = this;
 }
 
 DefaultDBClients.prototype = {
-	clientSecretIsOk: function(client_secret) {
-		return this.clientSecret == client_secret;
+	clientSecretCompare: function(client_secret) {
+		return this.client_secret == client_secret;
 	}
 
 , save: function() {
@@ -19,8 +19,8 @@ DefaultDBClients.prototype = {
 	}
 };
 
-DefaultDBClients.findByClientId = function(client_id, cb) {
-  var res = db.clientId != client_id ? false : db;
+DefaultDBClients.findOneByClientId = function(client_id, cb) {
+  var res = db.client_id != client_id ? false : db;
   return cb(null, res);
 };
 

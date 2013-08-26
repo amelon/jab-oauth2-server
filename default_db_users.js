@@ -10,40 +10,38 @@ function DefaultDBUsers(id, username, password) {
 	this.password = password;
 }
 
-DefaultDBUsers.prototype = {
-	passwordIsOk: function(password) {
-		return this.password == password;
-	}
-
-, save: function(cb) {
-    var item = _.pick(this, function(value) {
-      return !_.isFunction(value);
-    });
-    db.push(item);
-    if (cb) { cb(null, item); }
-	}
+DefaultDBUsers.prototype.comparePassword = function(candidatePassword, cb) {
+	cb(null, this.password == candidatePassword);
 };
 
-DefaultDBUsers.findByUsername = function(username, cb) {
+DefaultDBUsers.prototype.toObject =  function() {
+  return _.clone(this);
+};
+
+DefaultDBUsers.prototype.save = function(cb) {
+  db.push(this);
+  if (cb) { cb(null, this); }
+};
+
+DefaultDBUsers.prototype.passwordIsOk = DefaultDBUsers.prototype.comparePassword;
+
+DefaultDBUsers.findOneByUsername = function(username, cb) {
   var res = _.find(db, function(item) {
     return item.username == username;
   });
   if (res) {
-    _.extend(res, DefaultDBUsers.prototype);
     return cb(null, res);
   }
   return cb(null, false);
 };
 
 
-DefaultDBUsers.find = function(user_id, cb) {
+DefaultDBUsers.findOneById = function(user_id, cb) {
   var res = _.find(db, function(item) {
     return item.id == user_id;
   });
   if (res) {
-    res = _.clone(res);
-    _.extend(res, DefaultDBUsers.prototype);
-    return cb(null, _.clone(res));
+    return cb(null, res);
   }
   return cb(null, false);
 };

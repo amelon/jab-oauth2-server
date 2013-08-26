@@ -29,8 +29,8 @@ describe('Jab oauth server', function() {
       assert.doesNotThrow(function() { oauth_server.attach(app, {dbUsers: dbUsers, dbTokens: dbTokens, dbClients: dbClients}); });
     });
 
-    it('should init with dbUsers, dbTokens, clientId + clientSecret', function() {
-      assert.doesNotThrow(function() { oauth_server.attach(app, {dbUsers: dbUsers, dbTokens: dbTokens, clientId: 1, clientSecret: '007'}); });
+    it('should init with dbUsers, dbTokens, client_id + client_secret', function() {
+      assert.doesNotThrow(function() { oauth_server.attach(app, {dbUsers: dbUsers, dbTokens: dbTokens, client_id: 1, client_secret: '007'}); });
     });
 
 	});

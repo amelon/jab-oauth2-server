@@ -5,42 +5,20 @@
 process.env.NODE_ENV = 'test';
 
 var assert = require('chai').assert
-  , oauth_server = require('../index')
-  , users = require('../default_db_users')
-  , tokens = require('../default_db_tokens')
-  , express = require('express')
-  , app = express()
   , request = require('request')
-  , PORT = 3033;
+  , setup = require('./setup');
 
-var http = require('http');
-
-var token_uri = 'http://localhost:'+PORT+'/oauth/token';
-
-function btoa(data) {
-  return new Buffer(data, 'binary').toString('base64');
-}
-
+var btoa = setup.btoa;
 
 describe('OAuth Jab server started in express env', function() {
   before(function(done) {
-    app.use(express.cookieParser());
-    app.use(express.bodyParser());
-    app.use(express.session({ secret: 'keyboard cat' }));
-    oauth_server.attach(app, {dbUsers: users, dbTokens: tokens, clientId: 'james', clientSecret: '007'});
-
-    this.server = http.createServer(app);
-    this.server.listen(PORT, done);
-
-    //create user
-    new users(1, 'bob', 'secret').save();
-
+    this.server = setup.getHttpServer(done);
   });
 
   describe('make bad oauth request (basic)', function() {
     before(function(done) {
       request({
-        uri: token_uri
+        uri: setup.token_uri
       , method: 'POST'
       }, function(err, req, body) {
         this.body = body;
@@ -58,7 +36,7 @@ describe('OAuth Jab server started in express env', function() {
     before(function(done) {
 
       request({
-        uri: token_uri
+        uri: setup.token_uri
       , method: 'POST'
       , headers: {
         'authorization': 'Basic '+btoa('james:007')
@@ -90,7 +68,7 @@ describe('OAuth Jab server started in express env', function() {
     before(function(done) {
 
       request({
-        uri: token_uri
+        uri: setup.token_uri
       , method: 'POST'
       , headers: {
         'authorization': 'Basic '+btoa('james:008')
@@ -118,7 +96,7 @@ describe('OAuth Jab server started in express env', function() {
     before(function(done) {
 
       request({
-        uri: token_uri
+        uri: setup.token_uri
       , method: 'POST'
       , headers: {
         'authorization': 'Basic '+btoa('james:007')
@@ -147,7 +125,7 @@ describe('OAuth Jab server started in express env', function() {
     before(function(done) {
 
       request({
-        uri: token_uri
+        uri: setup.token_uri
       , method: 'POST'
       , headers: {
         'authorization': 'Basic '+btoa('james:007')

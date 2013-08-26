@@ -3,32 +3,19 @@
 'use strict';
 
 process.env.NODE_ENV = 'test';
-
 var assert = require('chai').assert
-  , oauth_server = require('../index')
-  , users = require('../default_db_users')
-  , tokens = require('../default_db_tokens')
-  , express = require('express')
-  , app = express()
   , request = require('request')
-  , PORT = 3033
-  , passport = require('passport')
-  , _ = require('lodash');
+  , setup = require('./setup');
+
+var btoa = setup.btoa;
+
 
 var slide = require('slide');
-var http = require('http');
-
-var token_uri = 'http://localhost:'+PORT+'/oauth/token';
-var bearer_uri = 'http://localhost:'+PORT+'/test_bearer';
-
-function btoa(data) {
-  return new Buffer(data, 'binary').toString('base64');
-}
 
 
 function getToken(done) {
   request({
-    uri: token_uri
+    uri: setup.token_uri
   , method: 'POST'
   , headers: {
     'authorization': 'Basic '+btoa('james:007')
@@ -46,7 +33,7 @@ function getToken(done) {
 
 function logout(access_token, done) {
   request({
-    uri: token_uri
+    uri: setup.token_uri
   , method: 'DELETE'
   , headers: {
       'authorization': 'Bearer ' + access_token
@@ -59,7 +46,7 @@ function logout(access_token, done) {
 
 function protectAccess(access_token, done) {
   request({
-    uri: bearer_uri
+    uri: setup.bearer_uri
   , method: 'GET'
   , headers: {
       'authorization': 'Bearer ' + access_token
@@ -73,25 +60,9 @@ function protectAccess(access_token, done) {
 
 describe('OAuth Jab server protect ressources', function() {
   before(function(done) {
-    app.use(express.cookieParser());
-    app.use(express.bodyParser());
-    app.use(express.session({ secret: 'keyboard cat' }));
-    oauth_server.attach(app, {dbUsers: users, dbTokens: tokens, clientId: 'james', clientSecret: '007'});
+    this.server = setup.getHttpServer(done);
 
-    app.get('/test_bearer'
-    , passport.authenticate('bearer', {session: false})
-    , function(req, res) {
-        res.json({ user_id: req.user.id, name: req.user.name, scope: req.authInfo.scope });
-      }
-    );
-
-    this.tokens = tokens;
-
-    this.server = http.createServer(app);
-    this.server.listen(PORT, done);
-
-    //create user
-    new users(1, 'bob', 'secret').save();
+    this.tokens = setup.tokens;
 
   });
 

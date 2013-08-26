@@ -1,4 +1,4 @@
-  Fast OAuth2 server installation, used with express
+  OAuth2 server installed quickly, used with express
 
   Using oauth2orize & passport
 

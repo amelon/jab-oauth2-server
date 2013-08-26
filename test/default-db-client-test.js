@@ -13,8 +13,8 @@ describe('Default DB Clients', function() {
 	});
 
 	describe('check static function', function() {
-		it('should have findByClientId', function() {
-			assert.isFunction(DefaultDbClients.findByClientId);
+		it('should have findOneByClientId', function() {
+			assert.isFunction(DefaultDbClients.findOneByClientId);
 		});
 	});
 
@@ -23,19 +23,19 @@ describe('Default DB Clients', function() {
 			this.db_client = new DefaultDbClients(1, 'clientSecret');
 		});
 
-		it('should have clientId, clientSecret, save, clientSecretIsOk properties', function() {
+		it('should have client_id, client_secret, save, clientSecretCompare properties', function() {
 			var db_client = this.db_client;
 
-			assert.property(db_client, 'clientId');
-			assert.property(db_client, 'clientSecret');
+			assert.property(db_client, 'client_id');
+			assert.property(db_client, 'client_secret');
 			assert.isFunction(db_client.save);
-			assert.isFunction(db_client.clientSecretIsOk);
+			assert.isFunction(db_client.clientSecretCompare);
 
 			db_client.save();
 		});
 
 		it('return false when not retrieved', function(done) {
-			DefaultDbClients.findByClientId(2, function(err, client) {
+			DefaultDbClients.findOneByClientId(2, function(err, client) {
 				if (err) { throw err; }
 				assert.isFalse(client);
 				done();
@@ -44,7 +44,7 @@ describe('Default DB Clients', function() {
 
 		describe('when retrieved', function() {
 			before(function(done) {
-				DefaultDbClients.findByClientId(1, function(err, client) {
+				DefaultDbClients.findOneByClientId(1, function(err, client) {
 					if (err) { return done(err); }
 					this.client = client;
 					assert(client);
@@ -54,14 +54,14 @@ describe('Default DB Clients', function() {
 
 			it('should return client instance', function() {
 				var client = this.client;
-				assert.property(client, 'clientId');
-				assert.property(client, 'clientSecret');
-				assert.isFunction(client.clientSecretIsOk);
+				assert.property(client, 'client_id');
+				assert.property(client, 'client_secret');
+				assert.isFunction(client.clientSecretCompare);
 			});
 
 			it('should compare clientSecret correctly', function() {
-				assert(this.client.clientSecretIsOk('clientSecret'));
-				assert.isFalse(this.client.clientSecretIsOk('badSecret'));
+				assert(this.client.clientSecretCompare('clientSecret'));
+				assert.isFalse(this.client.clientSecretCompare('badSecret'));
 			});
 
 		});

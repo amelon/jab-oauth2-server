@@ -4,10 +4,10 @@
 var db = []
   , _ = require('lodash');
 
-function DefaultDBTokens(id, user_id, client_id) {
-  this.id       = id;
-  this.userId   = user_id;
-  this.clientId = client_id;
+function DefaultDBTokens(token, user_id, client_id) {
+  this.token    = token;
+  this.user_id   = user_id;
+  this.client_id = client_id;
 }
 
 DefaultDBTokens.prototype = {
@@ -18,14 +18,14 @@ DefaultDBTokens.prototype = {
     db.push(item);
     process.nextTick(function() {
       if (cb) { cb(null, item); }
-    })
+    });
   }
 };
 
 
 
-DefaultDBTokens.find = function(token, cb) {
-  var res = _.find(db, {id: token});
+DefaultDBTokens.findOneByToken = function(token, cb) {
+  var res = _.find(db, {token: token});
 
   process.nextTick(function() {
     if (res) { return cb(null, res); }
@@ -37,7 +37,7 @@ DefaultDBTokens.count = function() {
   return db.length;
 };
 
-DefaultDBTokens.save = function(token, user_id, client_id, cb) {
+DefaultDBTokens.createByParams = function(token, user_id, client_id, cb) {
   var item = new DefaultDBTokens(token, user_id, client_id);
   process.nextTick(function() {
     item.save(cb);
@@ -45,7 +45,7 @@ DefaultDBTokens.save = function(token, user_id, client_id, cb) {
 };
 
 DefaultDBTokens.remove = function(token, cb) {
-  db = _.reject(db, {id: token});
+  db = _.reject(db, {token: token});
   process.nextTick(function() {
     cb(null, true);
   });

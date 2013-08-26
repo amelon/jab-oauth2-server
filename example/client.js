@@ -1,12 +1,10 @@
 /*jshint node:true */
-/*global describe, it, before, after */
 'use strict';
 
 var request = require('request')
   , PORT = 3033;
 
 var token_uri = 'http://localhost:'+PORT+'/oauth/token';
-var no_bearer_uri = 'http://localhost:'+PORT+'/test_no_protect';
 var bearer_uri = 'http://localhost:'+PORT+'/test_bearer';
 
 function btoa(data) {
@@ -30,8 +28,8 @@ function login() {
   }, function(err, resp, body) {
     body = body;
     console.log('resp login', {err: err, body:body});
-    if (err) return;
-    setTimeout(function() {logout(body)}, 1000);
+    if (err) { return; }
+    setTimeout(function() { logout(body); }, 1000);
   });
 }
 
@@ -46,8 +44,8 @@ function logout(data) {
       , json: true
       }, function(err, resp, body) {
         console.log('resp logout', {err: err, body:body});
-        if (err) return;
-        setTimeout(function() {onceAgain(data)})
+        if (err) { return; }
+        setTimeout(function() { onceAgain(data) ;});
       });
 }
 
