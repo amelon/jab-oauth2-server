@@ -21,18 +21,30 @@ describe('Default DB Token', function() {
   });
 
   describe('populate with 3 tokens', function() {
-    before(function() {
-      DefaultDbTokens.createByParams(1, 'user_id', 'client_id');
-      DefaultDbTokens.createByParams(2, 'user_id2', 'client_id2');
-      DefaultDbTokens.createByParams(3, 'user_id3', 'client_id3');
+    before(function(done) {
+      var _this = this;
+
+      DefaultDbTokens.createByParams('user_id', 'client_id', function(err, item) {
+        DefaultDbTokens.createByParams('user_id2', 'client_id2', function(err, item) {
+          DefaultDbTokens.createByParams('user_id3', 'client_id3', function(err, item) {
+            _this.token = item.token;
+            done(err);
+          });
+        });
+
+      });
     });
 
-    it('should have 3 tokens', function() {
-      assert.equal(DefaultDbTokens.count(), 3);
+    it('should have 3 tokens', function(done) {
+      DefaultDbTokens.count(function(err, count) {
+        console.log('nb tokens', count);
+        assert.equal(count, 3);
+        done();
+      });
     });
 
     it('should retrieve token 1', function(done) {
-      DefaultDbTokens.findOneByToken(1, function(err, token) {
+      DefaultDbTokens.findOneByToken(this.token, function(err, token) {
         if (err) { return done(err); }
         assert(token);
         done();
@@ -40,7 +52,7 @@ describe('Default DB Token', function() {
     });
 
     it('should return false when not retrieved', function(done) {
-      DefaultDbTokens.findOneByToken(4, function(err, token) {
+      DefaultDbTokens.findOneByToken('unknow_token', function(err, token) {
         if (err) { return done(err); }
         assert.isFalse(token);
         done();
@@ -48,9 +60,11 @@ describe('Default DB Token', function() {
     });
 
     it('should drop token', function(done) {
-      DefaultDbTokens.remove(1, function(err, res) {
-        assert.equal(DefaultDbTokens.count(), 2);
-        done();
+      DefaultDbTokens.remove(this.token, function(err, res) {
+        DefaultDbTokens.count(function(err, count) {
+          assert.equal(count, 2);
+          done();
+        });
       });
     });
   });

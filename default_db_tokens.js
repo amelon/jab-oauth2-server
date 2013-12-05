@@ -1,8 +1,10 @@
 /*jshint node:true */
 'use strict';
 
-var db = []
-  , _ = require('lodash');
+var db         = []
+  , _          = require('lodash')
+  , serializer = require('serializer').createSecureSerializer('crypt_key', 'sign_key');
+
 
 function DefaultDBTokens(token, user_id, client_id) {
   this.token    = token;
@@ -33,14 +35,21 @@ DefaultDBTokens.findOneByToken = function(token, cb) {
   });
 };
 
-DefaultDBTokens.count = function() {
-  return db.length;
+DefaultDBTokens.count = function(cb) {
+  process.nextTick(function() {
+    cb(null, db.length);
+  });
 };
 
-DefaultDBTokens.createByParams = function(token, user_id, client_id, cb) {
-  var item = new DefaultDBTokens(token, user_id, client_id);
-  process.nextTick(function() {
-    item.save(cb);
+
+DefaultDBTokens.createByParams = function(user_id, client_id, cb) {
+  this.count(function(err, count) {
+    var token = serializer.stringify([user_id, client_id, +new Date(), count]);
+
+    var item = new DefaultDBTokens(token, user_id, client_id);
+    process.nextTick(function() {
+      item.save(cb);
+    });
   });
 };
 
@@ -54,5 +63,6 @@ DefaultDBTokens.remove = function(token, cb) {
 DefaultDBTokens.list = function() {
   return db;
 };
+
 
 module.exports = DefaultDBTokens;

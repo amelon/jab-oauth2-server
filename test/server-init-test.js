@@ -6,8 +6,8 @@ process.env.NODE_ENV = 'test';
 var assert = require('chai').assert;
 
 var oauth_server = require('../index')
-  , express = require('express')
-  , app = express()
+  , express      = require('express')
+  , app          = express()
   , dbUsers
   , dbClients
   , dbTokens;

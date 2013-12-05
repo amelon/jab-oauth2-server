@@ -4,8 +4,6 @@
 var oauth2orize       = require('oauth2orize')
   , passport          = require('passport')
 
-  //@todo: need config settings for crypt_key & sign_key
-  , serializer        = require('serializer').createSecureSerializer('crypt_key', 'sign_key')
   , assert            = require('assert')
   , slide             = require('slide');
 
@@ -101,15 +99,13 @@ function exchangePassword(client, username, password, scope, done) {
     user.comparePassword(password, function(err, isMatched) {
       if (err) { return done(err); }
       if (!isMatched) { return done(null, false); }
-      db.tokens.count(function(err, count) {
-        if (err) return done(err);
 
-        var token = serializer.stringify([user.id, client.client_id, +new Date(), count]);
+        // var token = serializer.stringify([user.id, client.client_id, +new Date(), count]);
 
-        db.tokens.createByParams(token, user.id, client.client_id, function(err, token) {
-          if (err) { return done(err); }
-          done(null, token.token);
-        });
+      db.tokens.createByParams(user.id, client.client_id, function(err, token) {
+
+        if (err) { return done(err); }
+        done(null, token.token);
 
       });
     });

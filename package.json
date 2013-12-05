@@ -21,7 +21,9 @@
     "rest",
     "restfull"
   ],
-  "version": "0.0.9",
+
+  "version": "0.0.10",
+
   "dependencies": {
     "oauth2orize": "*",
     "passport": "*",
@@ -42,7 +44,7 @@
     "request": "~2.16.6"
   },
   "engines": {
-    "node": ">= 0.8.x"
+    "node": ">= 0.10.x"
   },
   "main": "index.js",
   "scripts": {
