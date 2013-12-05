@@ -101,11 +101,16 @@ function exchangePassword(client, username, password, scope, done) {
     user.comparePassword(password, function(err, isMatched) {
       if (err) { return done(err); }
       if (!isMatched) { return done(null, false); }
+      db.tokens.count(function(err, count) {
+        if (err) return done(err);
 
-      var token = serializer.stringify([user.id, client.client_id, +new Date(), db.tokens.count()]);
-      db.tokens.createByParams(token, user.id, client.client_id, function(err, token) {
-        if (err) { return done(err); }
-        done(null, token.token);
+        var token = serializer.stringify([user.id, client.client_id, +new Date(), count]);
+
+        db.tokens.createByParams(token, user.id, client.client_id, function(err, token) {
+          if (err) { return done(err); }
+          done(null, token.token);
+        });
+
       });
     });
   });
