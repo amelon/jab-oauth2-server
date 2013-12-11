@@ -164,10 +164,11 @@ function bearerStrategyCheck(accessToken, done) {
     user = res[res.length - 1];
     if (!user) { return done(null, false); }
 
-    user = user.toObject();
-    delete user.password;
-    delete user.salt;
+    // user = user.toObject();
+    // delete user.password;
+    // delete user.salt;
     user.access_token = accessToken;
+
 
 
       // to keep this example simple, restricted scopes are not implemented,
