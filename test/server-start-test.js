@@ -59,7 +59,7 @@ describe('OAuth Jab server started in express env', function() {
     });
 
     it('should have bearer token_type', function() {
-      assert.equal(this.body.token_type, 'bearer');
+      assert.equal(this.body.token_type, 'Bearer');
     });
   });
 
