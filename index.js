@@ -84,7 +84,7 @@ function attach(app, options) {
 
   app.use(passport.initialize());
   app.use(passport.session());
-  app.use(app.router);
+  // app.use(app.router);
 
   authenticateRoute(app);
   logoutRoute(app);
