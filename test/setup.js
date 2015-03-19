@@ -3,27 +3,31 @@
 'use strict';
 
 var oauth_server = require('../index')
-  , users = require('../default_db_users')
-  , tokens = require('../default_db_tokens')
-  , passport = require('passport')
-  , PORT = 3033
-  , express = require('express')
-  , app = express()
-;
-var http = require('http');
+  , users        = require('../default_db_users')
+  , tokens       = require('../default_db_tokens')
+  , passport     = require('passport')
+  , PORT         = 3033
+  , express      = require('express')
+  , app          = express();
 
-var token_uri = 'http://localhost:'+PORT+'/oauth/token';
+var bodyParser   = require('body-parser');
+var http         = require('http');
+
+var token_uri     = 'http://localhost:'+PORT+'/oauth/token';
 var no_bearer_uri = 'http://localhost:'+PORT+'/test_no_protect';
-var bearer_uri = 'http://localhost:'+PORT+'/test_bearer';
+var bearer_uri    = 'http://localhost:'+PORT+'/test_bearer';
 
 function getHttpServer(done) {
   //create user
   var user = new users(1, 'bob', 'secret');
   user.save();
 
-  app.use(express.cookieParser());
-  app.use(express.bodyParser());
-  app.use(express.session({ secret: 'keyboard cat' }));
+  // parse request bodies (req.body)
+  app.use( bodyParser.urlencoded({ extended: true }) );
+  // parse application/json
+  app.use(bodyParser.json());
+
+  // app.use(express.session({ secret: 'keyboard cat' }));
   oauth_server.attach(app, {dbUsers: users, dbTokens: tokens, client_id: 'james', client_secret: '007'});
 
 

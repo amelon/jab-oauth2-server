@@ -4,14 +4,16 @@
 
 process.env.NODE_ENV = 'test';
 
-var assert = require('chai').assert
+var assert  = require('chai').assert
   , request = require('request')
-  , setup = require('./setup');
+  , setup   = require('./setup');
 
-var btoa = setup.btoa;
+var btoa    = setup.btoa;
 
 
 describe('OAuth Jab server protect ressources', function() {
+  var access_token;
+
   before(function(done) {
     this.server = setup.getHttpServer(done);
   });
@@ -41,7 +43,7 @@ describe('OAuth Jab server protect ressources', function() {
 
     it('should have access_token', function() {
       assert(this.body.access_token);
-      this.access_token = this.body.access_token;
+      access_token = this.body.access_token;
     });
   });
 
@@ -52,7 +54,7 @@ describe('OAuth Jab server protect ressources', function() {
         uri: setup.bearer_uri
       , method: 'GET'
       , headers: {
-          'authorization': 'Bearer ' + this.access_token
+          'authorization': 'Bearer ' + access_token
         }
       , json: true
       }, function(err, resp, body) {

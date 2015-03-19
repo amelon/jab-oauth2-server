@@ -1,16 +1,22 @@
 var oauth_server = require('../index')
-  , users = require('../default_db_users')
-  , tokens = require('../default_db_tokens')
-  , express = require('express')
-  , app = express()
-  , request = require('request')
-  , PORT = 3033
-  , passport = require('passport');
-var http = require('http');
+  , users        = require('../default_db_users')
+  , tokens       = require('../default_db_tokens')
+  , express      = require('express')
+  , app          = express()
+  , request      = require('request')
+  , PORT         = 3033
+  , passport     = require('passport');
+var http         = require('http');
+var bodyParser   = require('body-parser');
 
-app.use(express.cookieParser());
-app.use(express.bodyParser());
-app.use(express.session({ secret: 'keyboard cat' }));
+// app.use(express.cookieParser());
+//
+// parse request bodies (req.body)
+app.use( bodyParser.urlencoded({ extended: true }) );
+// parse application/json
+app.use(bodyParser.json());
+
+// app.use(express.session({ secret: 'keyboard cat' }));
 oauth_server.attach(app, {dbUsers: users, dbTokens: tokens, client_id: 'james', client_secret: '007'});
 
 app.use(logErrors);

@@ -103,7 +103,6 @@ function exchangePassword(client, username, password, scope, done) {
         // var token = serializer.stringify([user.id, client.client_id, +new Date(), count]);
 
       db.tokens.createByParams(user.id, client.client_id, function(err, token) {
-
         if (err) { return done(err); }
         done(null, token.token);
 

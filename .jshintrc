@@ -1,0 +1,31 @@
+{
+  "curly": false,
+  "eqeqeq": false,
+  "expr": true,
+  "immed": true,
+  "latedef": false,
+  "laxcomma": true,
+  "newcap": true,
+  "noarg": true,
+  "nomen": false,
+  "node": true,
+  "sub": true,
+  "undef": true,
+  "unused": true,
+
+  "eqnull": true,
+
+  "browser": true,
+  "lastsemic": true,
+
+  "globals": {
+    "console": true,
+    "require": true,
+    "define": true,
+    "_": true,
+    "$": true,
+    "Backbone": true,
+    "JabberApp": true
+
+  }
+}
