@@ -21,7 +21,7 @@
     "rest",
     "restfull"
   ],
-  "version": "0.0.15",
+  "version": "0.1.0",
   "dependencies": {
     "oauth2orize": "*",
     "passport": "^0.2.1",
