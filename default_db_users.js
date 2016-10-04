@@ -18,6 +18,10 @@ DefaultDBUsers.prototype.toObject =  function() {
   return _.clone(this);
 };
 
+DefaultDBUsers.prototype.isActive =  function() {
+  return this.active
+};
+
 DefaultDBUsers.prototype.save = function(cb) {
   db.push(this);
   if (cb) { cb(null, this); }
