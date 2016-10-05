@@ -95,6 +95,7 @@ function exchangePassword(client, username, password, scope, done) {
   db.users.findOneByUsername(username, function(err, user) {
     if (err) { return done(err); }
     if (!user) { return done(null, false); }
+    if (user.isActive && !user.isActive()) { return done(null, false); }
 
     user.comparePassword(password, function(err, isMatched) {
       if (err) { return done(err); }
@@ -162,18 +163,17 @@ function bearerStrategyCheck(accessToken, done) {
     if (err) { return done(err); }
     user = res[res.length - 1];
     if (!user) { return done(null, false); }
+    if (user.isActive && !user.isActive()) { return done(null, false); }
 
     // user = user.toObject();
     // delete user.password;
     // delete user.salt;
     user.access_token = accessToken;
 
-
-
-      // to keep this example simple, restricted scopes are not implemented,
-      // and this is just for illustrative purposes
-      var info = { scope: '*' };
-      done(null, user, info);
+    // to keep this example simple, restricted scopes are not implemented,
+    // and this is just for illustrative purposes
+    var info = { scope: '*' };
+    done(null, user, info);
   });
 }
 
@@ -205,7 +205,7 @@ function logoutRoute(app) {
   app.delete('/oauth/token',
     passport.authenticate('bearer', {session: false})
   , function(req, res, next) {
-      db.tokens.remove({ token: req.user.access_token }, function(err) {  	
+      db.tokens.remove({ token: req.user.access_token }, function(err) {
         if (err) { return next(err); }
         req.logout();
         res.send(true);

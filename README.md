@@ -123,6 +123,32 @@ app.listen(3000);
     $ npm install jab-oauth2-server
 
 
+## Implementation
+
+The following methods MUST be implemented in your db models (see default_db_*.js)
+
+### db_client
+
+  * static   : DBClients.findOneByClientId
+  * prototype: client.clientSecretCompare
+
+### db_user
+
+  * static   : findOneByUsername
+  * static   : findOneById
+  * prototype: comparePassword
+  * prototype: toObject
+
+  _Optional method_ :
+  If implemented, refuse connection if `!user.isActive()`
+  
+  * prototype: isActive
+
+### db_tokens
+
+  * static   : createByParams
+  * static   : findOneByToken
+
 ## More Information
 
 
