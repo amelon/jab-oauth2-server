@@ -139,10 +139,11 @@ The following methods MUST be implemented in your db models (see default_db_*.js
   * prototype: comparePassword
   * prototype: toObject
 
-  _Optional method_ :
-  If implemented, refuse connection if `!user.isActive()`
   
   * prototype: isActive
+
+  _Optional method_ :
+  If implemented, refuse connection if `!user.isActive()`
 
 ### db_tokens
 
