@@ -1,3 +1,8 @@
+## Depracted
+
+see: https://www.npmjs.com/package/@b-flower/bdn-oauth2-server
+
+
   OAuth2 server installed quickly, used with express
 
   Using oauth2orize & passport
@@ -139,7 +144,7 @@ The following methods MUST be implemented in your db models (see default_db_*.js
   * prototype: comparePassword
   * prototype: toObject
 
-  
+
   * prototype: isActive
 
   _Optional method_ :
